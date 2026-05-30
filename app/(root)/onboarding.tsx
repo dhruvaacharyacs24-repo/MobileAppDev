@@ -1,3 +1,4 @@
+import { onboardingDraft } from "@/lib/onboarding-draft";
 import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Controller, useForm } from "react-hook-form";
