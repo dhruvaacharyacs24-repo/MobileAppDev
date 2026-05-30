@@ -6,7 +6,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { ActivityIndicator, Text, View } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { z } from "zod";
-import { pdfTest } from "@/services/pdf-test";
 import { AppButton } from "@/components/ui/app-button";
 import { AppInput } from "@/components/ui/app-input";
 import { GlassCard } from "@/components/ui/glass-card";
@@ -90,6 +89,8 @@ const [error, setError] = useState("");
 
 const [selectedResume, setSelectedResume] =
   useState<string>("");
+const [resumeLoading, setResumeLoading] =
+  useState(false);
 
   const { control, handleSubmit, reset, watch } =
     useForm<FormValues>({
@@ -219,16 +220,78 @@ const [selectedResume, setSelectedResume] =
           </Text>
          <View className="mt-5 mb-6">
   <AppButton
-    label="📄 Upload Resume"
-    onPress={async () => {
-  const { pdfcoTest } = await import(
-    "@/services/pdfco-test"
-  );
+  label={
+    resumeLoading
+      ? "Analyzing Resume..."
+      : "📄 Upload Resume"
+  }
+  loading={resumeLoading}
+  onPress={async () => {
+  try {
+    setResumeLoading(true);
 
-  await pdfcoTest.ping();
+    const file =
+      await resumeService.pickResume();
+
+    if (!file) {
+      setResumeLoading(false);
+      return;
+    }
+
+    setSelectedResume(file.name);
+
+    const parsed =
+      await resumeService.processResume(
+        file
+      );
+
+    reset({
+      full_name:
+        parsed.full_name ?? "",
+
+      education:
+        parsed.education ?? "",
+
+      interests:
+        parsed.interests.join(", "),
+
+      projects:
+        parsed.projects.join(", "),
+
+      certifications:
+        parsed.certifications.join(", "),
+
+      resume_text:
+        parsed.resume_summary ?? "",
+
+      github_url: "",
+
+      linkedin_url: "",
+
+      preferred_career_path:
+        parsed.preferred_career_path ?? "",
+
+      skills:
+        parsed.skills.join(", "),
+    });
+
+    alert(
+      `Resume analyzed successfully!\n\nResume Quality: ${parsed.resumeQuality}/100`
+    );
+  } catch (error) {
+    console.log(error);
+
+    alert(
+      error instanceof Error
+        ? error.message
+        : "Resume analysis failed"
+    );
+  } finally {
+    setResumeLoading(false);
+  }
 }}
-    variant="secondary"
-  />
+  variant="secondary"
+/>
 
   {selectedResume ? (
     <Text className="mt-3 text-sm text-emerald-400">
