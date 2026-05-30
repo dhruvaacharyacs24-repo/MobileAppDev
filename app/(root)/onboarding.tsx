@@ -3,7 +3,8 @@ import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ActivityIndicator, ScrollView, Text, View } from "react-native";
+import { ActivityIndicator, Text, View } from "react-native";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { z } from "zod";
 
 import { AppButton } from "@/components/ui/app-button";
@@ -193,10 +194,17 @@ export default function OnboardingScreen() {
 
   return (
     <GradientScreen>
-      <ScrollView
-        className="flex-1"
-        contentContainerStyle={{ paddingVertical: 24 }}
-      >
+      <KeyboardAwareScrollView
+  className="flex-1"
+  contentContainerStyle={{
+    paddingVertical: 24,
+    paddingBottom: 120,
+  }}
+  enableOnAndroid
+  keyboardShouldPersistTaps="handled"
+  extraScrollHeight={40}
+  showsVerticalScrollIndicator={false}
+>
         <GlassCard>
           <Text className="text-3xl font-bold text-zinc-100">
             Complete your profile
@@ -404,7 +412,7 @@ export default function OnboardingScreen() {
             loading={loading}
           />
         </GlassCard>
-      </ScrollView>
+      </KeyboardAwareScrollView>
     </GradientScreen>
   );
 }
