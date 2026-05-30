@@ -1,11 +1,17 @@
 {
   "expo": {
-    "name": "MAD",
-    "slug": "MAD",
+    "name": "SkillSync AI",
+    "slug": "skillsync-ai",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
+    "userInterfaceStyle": "dark",
+    "scheme": "skillsyncai",
+    "plugins": [
+      "expo-router",
+      "expo-secure-store",
+      "expo-notifications"
+    ],
     "ios": {
       "supportsTablet": true
     },
@@ -20,6 +26,9 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "experiments": {
+      "typedRoutes": true
     }
   }
 }
