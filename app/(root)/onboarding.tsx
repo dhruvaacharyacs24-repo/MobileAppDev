@@ -1,8 +1,8 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ActivityIndicator, ScrollView, Text } from "react-native";
+import { ActivityIndicator, ScrollView, Text, View } from "react-native";
 import { z } from "zod";
 
 import { AppButton } from "@/components/ui/app-button";
@@ -22,11 +22,19 @@ const schema = z.object({
   github_url: z
     .string()
     .trim()
-    .refine((value) => value === "" || z.string().url().safeParse(value).success, "Enter a valid URL"),
+    .refine(
+      (value) =>
+        value === "" || z.string().url().safeParse(value).success,
+      "Enter a valid URL"
+    ),
   linkedin_url: z
     .string()
     .trim()
-    .refine((value) => value === "" || z.string().url().safeParse(value).success, "Enter a valid URL"),
+    .refine(
+      (value) =>
+        value === "" || z.string().url().safeParse(value).success,
+      "Enter a valid URL"
+    ),
   preferred_career_path: z.string().min(2),
   skills: z.string().min(2),
 });
@@ -35,24 +43,26 @@ type FormValues = z.infer<typeof schema>;
 
 export default function OnboardingScreen() {
   const { session, setOnboardingCompleted } = useAuthStore();
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const { control, handleSubmit, reset } = useForm<FormValues>({
-    resolver: zodResolver(schema),
-    defaultValues: {
-      full_name: "",
-      education: "",
-      interests: "",
-      projects: "",
-      certifications: "",
-      resume_text: "",
-      github_url: "",
-      linkedin_url: "",
-      preferred_career_path: "",
-      skills: "",
-    },
-  });
+  const { control, handleSubmit, reset, watch } =
+    useForm<FormValues>({
+      resolver: zodResolver(schema),
+      defaultValues: {
+        full_name: "",
+        education: "",
+        interests: "",
+        projects: "",
+        certifications: "",
+        resume_text: "",
+        github_url: "",
+        linkedin_url: "",
+        preferred_career_path: "",
+        skills: "",
+      },
+    });
 
   const profileQuery = useQuery({
     queryKey: ["onboarding-profile", session?.user.id],
@@ -78,10 +88,38 @@ export default function OnboardingScreen() {
       resume_text: profileQuery.data.resume_text ?? "",
       github_url: profileQuery.data.github_url ?? "",
       linkedin_url: profileQuery.data.linkedin_url ?? "",
-      preferred_career_path: profileQuery.data.preferred_career_path ?? "",
-      skills: (skillsQuery.data ?? []).map((s) => s.name).join(", "),
+      preferred_career_path:
+        profileQuery.data.preferred_career_path ?? "",
+      skills: (skillsQuery.data ?? [])
+        .map((s) => s.name)
+        .join(", "),
     });
   }, [profileQuery.data, reset, skillsQuery.data]);
+
+  const values = watch();
+
+  const progress = useMemo(() => {
+    const fields = [
+      values.full_name,
+      values.education,
+      values.skills,
+      values.interests,
+      values.projects,
+      values.certifications,
+      values.resume_text,
+      values.preferred_career_path,
+    ];
+
+    const completed = fields.filter(
+      (field) => field && field.trim().length > 0
+    ).length;
+
+    return {
+      completed,
+      total: fields.length,
+      percentage: Math.round((completed / fields.length) * 100),
+    };
+  }, [values]);
 
   const onSubmit = async (values: FormValues) => {
     if (!session?.user.id) return;
@@ -96,17 +134,19 @@ export default function OnboardingScreen() {
         linkedin_url: values.linkedin_url.trim(),
         interests: values.interests.split(",").map((v) => v.trim()),
         projects: values.projects.split(",").map((v) => v.trim()),
-        certifications: values.certifications.split(",").map((v) => v.trim()),
+        certifications: values.certifications
+          .split(",")
+          .map((v) => v.trim()),
         skills: values.skills.split(",").map((v) => v.trim()),
       });
 
       setOnboardingCompleted(true);
-
-      // IMPORTANT:
-      // No router.replace("/")
-      // ProtectedLayout should redirect automatically
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Unable to save profile.");
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Unable to save profile."
+      );
     } finally {
       setLoading(false);
     }
@@ -114,49 +154,197 @@ export default function OnboardingScreen() {
 
   return (
     <GradientScreen>
-      <ScrollView className="flex-1" contentContainerStyle={{ paddingVertical: 24 }}>
+      <ScrollView
+        className="flex-1"
+        contentContainerStyle={{ paddingVertical: 24 }}
+      >
         <GlassCard>
-          <Text className="mb-5 text-2xl font-bold text-zinc-100">
+          <Text className="text-3xl font-bold text-zinc-100">
             Complete your profile
           </Text>
 
+          <Text className="mt-2 text-zinc-400">
+            Help us build your personalized career roadmap.
+          </Text>
+
+          <View className="mt-6">
+            <View className="mb-2 flex-row items-center justify-between">
+              <Text className="text-sm font-medium text-cyan-300">
+                Profile Completion
+              </Text>
+
+              <Text className="text-sm font-semibold text-cyan-300">
+                {progress.percentage}%
+              </Text>
+            </View>
+
+            <View className="h-3 overflow-hidden rounded-full bg-slate-800">
+              <View
+                className="h-full rounded-full bg-cyan-400"
+                style={{
+                  width: `${progress.percentage}%`,
+                }}
+              />
+            </View>
+
+            <Text className="mt-2 text-xs text-slate-400">
+              {progress.completed} of {progress.total} required sections
+              completed
+            </Text>
+          </View>
+
           {profileQuery.isLoading || skillsQuery.isLoading ? (
-            <ActivityIndicator color="#22D3EE" className="mb-4" />
+            <ActivityIndicator
+              color="#22D3EE"
+              className="my-6"
+            />
           ) : null}
 
-          {(
-            [
-              ["full_name", "Full name", "Dhruv Sharma"],
-              ["education", "Education", "B.Tech CSE, Semester 4"],
-              ["skills", "Skills (comma-separated)", "React, TypeScript, SQL"],
-              ["interests", "Interests", "AI, Product Development"],
-              ["projects", "Projects", "SkillSync MVP, Campus Portal"],
-              ["certifications", "Certifications", "AWS CCP, Meta RN"],
-              ["resume_text", "Resume summary", "A concise summary of your resume..."],
-              ["github_url", "GitHub URL (optional)", "https://github.com/username"],
-              ["linkedin_url", "LinkedIn URL (optional)", "https://linkedin.com/in/username"],
-              ["preferred_career_path", "Preferred career", "Frontend Engineer"],
-            ] as const
-          ).map(([name, label, placeholder]) => (
-            <Controller
-              key={name}
-              control={control}
-              name={name}
-              render={({ field: { value, onChange }, fieldState }) => (
-                <AppInput
-                  label={label}
-                  placeholder={placeholder}
-                  value={value}
-                  onChangeText={onChange}
-                  multiline={name === "resume_text"}
-                  error={fieldState.error?.message}
-                />
-              )}
-            />
-          ))}
+          <Controller
+            control={control}
+            name="full_name"
+            render={({ field: { value, onChange }, fieldState }) => (
+              <AppInput
+                label="Full name"
+                placeholder="Dhruv Sharma"
+                value={value}
+                onChangeText={onChange}
+                error={fieldState.error?.message}
+              />
+            )}
+          />
+
+          <Controller
+            control={control}
+            name="education"
+            render={({ field: { value, onChange }, fieldState }) => (
+              <AppInput
+                label="Education"
+                placeholder="B.Tech CSE, Semester 4"
+                value={value}
+                onChangeText={onChange}
+                error={fieldState.error?.message}
+              />
+            )}
+          />
+
+          <Controller
+            control={control}
+            name="skills"
+            render={({ field: { value, onChange }, fieldState }) => (
+              <AppInput
+                label="Skills (comma-separated)"
+                placeholder="React, TypeScript, SQL"
+                value={value}
+                onChangeText={onChange}
+                error={fieldState.error?.message}
+              />
+            )}
+          />
+
+          <Controller
+            control={control}
+            name="interests"
+            render={({ field: { value, onChange }, fieldState }) => (
+              <AppInput
+                label="Interests"
+                placeholder="AI, Product Development"
+                value={value}
+                onChangeText={onChange}
+                error={fieldState.error?.message}
+              />
+            )}
+          />
+
+          <Controller
+            control={control}
+            name="projects"
+            render={({ field: { value, onChange }, fieldState }) => (
+              <AppInput
+                label="Projects"
+                placeholder="SkillSync MVP, Campus Portal"
+                value={value}
+                onChangeText={onChange}
+                error={fieldState.error?.message}
+              />
+            )}
+          />
+
+          <Controller
+            control={control}
+            name="certifications"
+            render={({ field: { value, onChange }, fieldState }) => (
+              <AppInput
+                label="Certifications"
+                placeholder="AWS CCP, Meta RN"
+                value={value}
+                onChangeText={onChange}
+                error={fieldState.error?.message}
+              />
+            )}
+          />
+
+          <Controller
+            control={control}
+            name="resume_text"
+            render={({ field: { value, onChange }, fieldState }) => (
+              <AppInput
+                label="Resume summary"
+                placeholder="A concise summary of your resume..."
+                value={value}
+                onChangeText={onChange}
+                multiline
+                error={fieldState.error?.message}
+              />
+            )}
+          />
+
+          <Controller
+            control={control}
+            name="github_url"
+            render={({ field: { value, onChange }, fieldState }) => (
+              <AppInput
+                label="GitHub URL (optional)"
+                placeholder="https://github.com/username"
+                value={value}
+                onChangeText={onChange}
+                error={fieldState.error?.message}
+              />
+            )}
+          />
+
+          <Controller
+            control={control}
+            name="linkedin_url"
+            render={({ field: { value, onChange }, fieldState }) => (
+              <AppInput
+                label="LinkedIn URL (optional)"
+                placeholder="https://linkedin.com/in/username"
+                value={value}
+                onChangeText={onChange}
+                error={fieldState.error?.message}
+              />
+            )}
+          />
+
+          <Controller
+            control={control}
+            name="preferred_career_path"
+            render={({ field: { value, onChange }, fieldState }) => (
+              <AppInput
+                label="Preferred career"
+                placeholder="Frontend Engineer"
+                value={value}
+                onChangeText={onChange}
+                error={fieldState.error?.message}
+              />
+            )}
+          />
 
           {error ? (
-            <Text className="mb-3 text-sm text-rose-400">{error}</Text>
+            <Text className="mb-3 text-sm text-rose-400">
+              {error}
+            </Text>
           ) : null}
 
           <AppButton
