@@ -6,7 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { ActivityIndicator, Text, View } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { z } from "zod";
-
+import { pdfTest } from "@/services/pdf-test";
 import { AppButton } from "@/components/ui/app-button";
 import { AppInput } from "@/components/ui/app-input";
 import { GlassCard } from "@/components/ui/glass-card";
@@ -213,6 +213,21 @@ export default function OnboardingScreen() {
           <Text className="mt-2 text-zinc-400">
             Help us build your personalized career roadmap.
           </Text>
+         <View className="mt-4 mb-6">
+  <AppButton
+  label="📄 Upload Resume"
+  onPress={async () => {
+    const result = await pdfTest.pick();
+
+    if (!result) {
+      alert("No file selected");
+      return;
+    }
+
+    alert(`Selected: ${result.name}`);
+  }}
+/>
+</View>
 
           <View className="mt-6">
             <View className="mb-2 flex-row items-center justify-between">
