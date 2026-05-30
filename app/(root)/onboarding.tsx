@@ -221,15 +221,12 @@ const [selectedResume, setSelectedResume] =
   <AppButton
     label="📄 Upload Resume"
     onPress={async () => {
-      const file =
-        await resumeService.pickResume();
+  const { pdfcoTest } = await import(
+    "@/services/pdfco-test"
+  );
 
-      if (!file) {
-        return;
-      }
-
-      setSelectedResume(file.name);
-    }}
+  await pdfcoTest.ping();
+}}
     variant="secondary"
   />
 

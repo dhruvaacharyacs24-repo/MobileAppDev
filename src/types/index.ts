@@ -34,3 +34,18 @@ export type AiAnalysis = {
   recommendations: string[];
   atsFeedback: string[];
 };
+
+export type ParsedResume = {
+  full_name: string;
+  education: string;
+  skills: string[];
+  interests: string[];
+  projects: string[];
+  certifications: string[];
+  preferred_career_path: string;
+  resume_summary: string;
+
+  resumeQuality: number;
+  resumeStrengths: string[];
+  resumeIssues: string[];
+};
