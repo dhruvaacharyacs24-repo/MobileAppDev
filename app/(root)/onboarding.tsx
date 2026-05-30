@@ -13,30 +13,68 @@ import { profileService } from "@/services/profile-service";
 import { useAuthStore } from "@/store/auth-store";
 
 const schema = z.object({
-  full_name: z.string().min(2),
-  education: z.string().min(3),
-  interests: z.string().min(2),
-  projects: z.string().min(2),
-  certifications: z.string().min(2),
-  resume_text: z.string().min(20),
+  
+  full_name: z
+    .string()
+    .min(5, "Please enter your full name")
+    .refine(
+      (value) => value.trim().split(" ").length >= 2,
+      "Enter both first and last name"
+    ),
+
+  education: z
+    .string()
+    .min(5, "Please provide your education details"),
+
+  interests: z
+    .string()
+    .min(3, "Add at least one interest"),
+
+  projects: z
+    .string()
+    .min(3, "Add at least one project"),
+
+  certifications: z
+    .string()
+    .min(3, "Add at least one certification"),
+
+  resume_text: z
+    .string()
+    .min(
+      20,
+      "Resume summary should be at least 20 characters"
+    ),
+
   github_url: z
     .string()
     .trim()
     .refine(
       (value) =>
         value === "" || z.string().url().safeParse(value).success,
-      "Enter a valid URL"
+      "Enter a valid GitHub URL"
     ),
+
   linkedin_url: z
     .string()
     .trim()
     .refine(
       (value) =>
         value === "" || z.string().url().safeParse(value).success,
-      "Enter a valid URL"
+      "Enter a valid LinkedIn URL"
     ),
-  preferred_career_path: z.string().min(2),
-  skills: z.string().min(2),
+
+  preferred_career_path: z
+    .string()
+    .min(3, "Select your target career path"),
+
+  skills: z.string().refine(
+    (value) =>
+      value
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean).length >= 2,
+    "Add at least 2 skills"
+  ),
 });
 
 type FormValues = z.infer<typeof schema>;
@@ -199,7 +237,9 @@ export default function OnboardingScreen() {
               className="my-6"
             />
           ) : null}
-
+          <Text className="mt-8 mb-3 text-lg font-semibold text-cyan-300">
+              Personal Information
+          </Text>
           <Controller
             control={control}
             name="full_name"
@@ -227,7 +267,9 @@ export default function OnboardingScreen() {
               />
             )}
           />
-
+          <Text className="mt-6 mb-3 text-lg font-semibold text-cyan-300">
+            Skills & Interests
+          </Text>
           <Controller
             control={control}
             name="skills"
@@ -255,7 +297,9 @@ export default function OnboardingScreen() {
               />
             )}
           />
-
+          <Text className="mt-6 mb-3 text-lg font-semibold text-cyan-300">
+            Experience
+          </Text>
           <Controller
             control={control}
             name="projects"
@@ -283,7 +327,9 @@ export default function OnboardingScreen() {
               />
             )}
           />
-
+          <Text className="mt-6 mb-3 text-lg font-semibold text-cyan-300">
+            Resume Summary
+          </Text>
           <Controller
             control={control}
             name="resume_text"
@@ -298,7 +344,9 @@ export default function OnboardingScreen() {
               />
             )}
           />
-
+          <Text className="mt-6 mb-3 text-lg font-semibold text-cyan-300">
+            Professional Presence
+          </Text>
           <Controller
             control={control}
             name="github_url"
@@ -326,7 +374,9 @@ export default function OnboardingScreen() {
               />
             )}
           />
-
+          <Text className="mt-6 mb-3 text-lg font-semibold text-cyan-300">
+            Career Goals
+          </Text>
           <Controller
             control={control}
             name="preferred_career_path"
