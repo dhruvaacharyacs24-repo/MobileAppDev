@@ -13,6 +13,7 @@ import { GlassCard } from "@/components/ui/glass-card";
 import { GradientScreen } from "@/components/ui/gradient-screen";
 import { profileService } from "@/services/profile-service";
 import { useAuthStore } from "@/store/auth-store";
+import {resumeService} from "@/services/resume-service";
 
 const schema = z.object({
   
@@ -84,8 +85,11 @@ type FormValues = z.infer<typeof schema>;
 export default function OnboardingScreen() {
   const { session, setOnboardingCompleted } = useAuthStore();
 
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+ const [loading, setLoading] = useState(false);
+const [error, setError] = useState("");
+
+const [selectedResume, setSelectedResume] =
+  useState<string>("");
 
   const { control, handleSubmit, reset, watch } =
     useForm<FormValues>({
@@ -213,20 +217,32 @@ export default function OnboardingScreen() {
           <Text className="mt-2 text-zinc-400">
             Help us build your personalized career roadmap.
           </Text>
-         <View className="mt-4 mb-6">
+         <View className="mt-5 mb-6">
   <AppButton
-  label="📄 Upload Resume"
-  onPress={async () => {
-    const result = await pdfTest.pick();
+    label="📄 Upload Resume"
+    onPress={async () => {
+      const file =
+        await resumeService.pickResume();
 
-    if (!result) {
-      alert("No file selected");
-      return;
-    }
+      if (!file) {
+        return;
+      }
 
-    alert(`Selected: ${result.name}`);
-  }}
-/>
+      setSelectedResume(file.name);
+    }}
+    variant="secondary"
+  />
+
+  {selectedResume ? (
+    <Text className="mt-3 text-sm text-emerald-400">
+      ✓ Selected: {selectedResume}
+    </Text>
+  ) : (
+    <Text className="mt-3 text-sm text-zinc-500">
+      Upload your resume to auto-fill skills,
+      projects, interests and resume summary.
+    </Text>
+  )}
 </View>
 
           <View className="mt-6">
