@@ -13,6 +13,8 @@ import { GradientScreen } from "@/components/ui/gradient-screen";
 import { profileService } from "@/services/profile-service";
 import { useAuthStore } from "@/store/auth-store";
 import {resumeService} from "@/services/resume-service";
+import { Pressable} from "react-native";
+import { router } from "expo-router";
 
 const schema = z.object({
   
@@ -82,7 +84,11 @@ const schema = z.object({
 type FormValues = z.infer<typeof schema>;
 
 export default function OnboardingScreen() {
-  const { session, setOnboardingCompleted } = useAuthStore();
+  const {
+  session,
+  setOnboardingCompleted,
+  setEditingOnboarding,
+} = useAuthStore();
 
  const [loading, setLoading] = useState(false);
 const [error, setError] = useState("");
@@ -108,6 +114,7 @@ const [resumeLoading, setResumeLoading] =
         skills: "",
       },
     });
+
 
   const profileQuery = useQuery({
     queryKey: ["onboarding-profile", session?.user.id],
@@ -188,7 +195,8 @@ const [resumeLoading, setResumeLoading] =
 skillsQuery.refetch();
       
 
-      setOnboardingCompleted(true);
+      setEditingOnboarding(false);
+setOnboardingCompleted(true);
     } catch (err) {
       setError(
         err instanceof Error
@@ -213,6 +221,17 @@ skillsQuery.refetch();
   extraScrollHeight={40}
   showsVerticalScrollIndicator={false}
 >
+  <View className="mb-4 flex-row justify-end">
+  <Pressable
+    onPress={() =>
+      router.push("/(root)/(tabs)")
+    }
+  >
+    <Text className="font-semibold text-cyan-300">
+      ← Back to Dashboard
+    </Text>
+  </Pressable>
+</View>
         <GlassCard>
           <Text className="text-3xl font-bold text-zinc-100">
             Complete your profile

@@ -5,35 +5,92 @@ import { profileService } from "@/services/profile-service";
 import { useAuthStore } from "@/store/auth-store";
 
 export const useAuthBootstrap = () => {
-  const { setSession, setLoading, setOnboardingCompleted } = useAuthStore();
+  const {
+    setSession,
+    setLoading,
+    setOnboardingCompleted,
+  } = useAuthStore();
 
   useEffect(() => {
     let mounted = true;
 
-    supabase.auth.getSession().then(async ({ data }) => {
-      if (!mounted) return;
-      setSession(data.session);
-      if (data.session?.user?.id) {
-        const profile = await profileService.getProfile(data.session.user.id);
-        setOnboardingCompleted(Boolean(profile));
-      }
-      setLoading(false);
-    });
+    const bootstrap = async () => {
+      try {
+        const { data } =
+          await supabase.auth.getSession();
 
-    const { data: listener } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      setSession(session);
-      if (session?.user?.id) {
-        const profile = await profileService.getProfile(session.user.id);
-        setOnboardingCompleted(Boolean(profile));
-      } else {
-        setOnboardingCompleted(false);
+        if (!mounted) return;
+
+        setSession(data.session);
+
+        if (data.session?.user?.id) {
+          try {
+            const profile =
+              await profileService.getProfile(
+                data.session.user.id
+              );
+
+            setOnboardingCompleted(
+              Boolean(profile)
+            );
+          } catch (error) {
+            console.log(
+              "[AUTH] Profile fetch failed",
+              error
+            );
+
+            setOnboardingCompleted(false);
+          }
+        } else {
+          setOnboardingCompleted(false);
+        }
+      } catch (error) {
+        console.log(
+          "[AUTH] Session restore failed",
+          error
+        );
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
-    });
+    };
+
+    bootstrap();
+
+    const { data: listener } =
+      supabase.auth.onAuthStateChange(
+        async (_event, session) => {
+          try {
+            setSession(session);
+
+            if (session?.user?.id) {
+              try {
+                const profile =
+                  await profileService.getProfile(
+                    session.user.id
+                  );
+
+                setOnboardingCompleted(
+                  Boolean(profile)
+                );
+              } catch {
+                setOnboardingCompleted(false);
+              }
+            } else {
+              setOnboardingCompleted(false);
+            }
+          } finally {
+            setLoading(false);
+          }
+        }
+      );
 
     return () => {
       mounted = false;
       listener.subscription.unsubscribe();
     };
-  }, [setLoading, setOnboardingCompleted, setSession]);
+  }, [
+    setLoading,
+    setOnboardingCompleted,
+    setSession,
+  ]);
 };

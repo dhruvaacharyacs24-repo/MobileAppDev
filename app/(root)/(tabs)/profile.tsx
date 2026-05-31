@@ -2,7 +2,7 @@ import { ScrollView, Text, View } from "react-native";
 import { useQuery } from "@tanstack/react-query";
 import { BookOpenText, BriefcaseBusiness, GraduationCap, Mail } from "lucide-react-native";
 import { LinearGradient } from "expo-linear-gradient";
-
+import { router } from "expo-router";
 import { AppButton } from "@/components/ui/app-button";
 import { GlassCard } from "@/components/ui/glass-card";
 import { GradientScreen } from "@/components/ui/gradient-screen";
@@ -11,7 +11,10 @@ import { profileService } from "@/services/profile-service";
 import { useAuthStore } from "@/store/auth-store";
 
 export default function ProfileScreen() {
-  const { session, setOnboardingCompleted } = useAuthStore();
+  const {
+  session,
+  setEditingOnboarding,
+} = useAuthStore();
   const userId = session?.user.id ?? "";
   const profileQuery = useQuery({
     queryKey: ["profile", userId],
@@ -80,12 +83,13 @@ export default function ProfileScreen() {
 
         <View className="mb-8 gap-3">
           <AppButton
-            label="Edit onboarding data"
-            onPress={() => {
-              setOnboardingCompleted(false);
-            }}
-            variant="secondary"
-          />
+  label="Edit onboarding data"
+  onPress={() => {
+    setEditingOnboarding(true);
+    router.push("/onboarding");
+  }}
+  variant="secondary"
+/>
           <AppButton
             label="Logout"
             onPress={async () => {

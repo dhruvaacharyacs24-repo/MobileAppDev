@@ -1,21 +1,25 @@
 import { Redirect, Stack, usePathname } from "expo-router";
-import { useEffect } from "react";
 import { ActivityIndicator, View } from "react-native";
 
 import { useAuthStore } from "@/store/auth-store";
 
 export default function ProtectedLayout() {
-  const { session, loading, onboardingCompleted } = useAuthStore();
-  const pathname = usePathname();
-  const inAuth =
-    pathname.includes("/login") || pathname.includes("/signup") || pathname.includes("/forgot-password");
-  const inOnboarding = pathname.includes("/onboarding");
+  const {
+    session,
+    loading,
+    onboardingCompleted,
+    editingOnboarding,
+  } = useAuthStore();
 
-  useEffect(() => {
-    // #region agent log
-    fetch("http://127.0.0.1:7688/ingest/8e61f5bc-1219-4ad9-a432-ae08fa2ba365",{method:"POST",headers:{"Content-Type":"application/json","X-Debug-Session-Id":"501c1c"},body:JSON.stringify({sessionId:"501c1c",runId:"pre-fix",hypothesisId:"H5",location:"(root)/_layout.tsx:state-change",message:"layout auth state changed",data:{pathname,isAuthenticated:Boolean(session),loading,onboardingCompleted,inAuth,inOnboarding},timestamp:Date.now()})}).catch(()=>{});
-    // #endregion
-  }, [inAuth, inOnboarding, loading, onboardingCompleted, pathname, session]);
+  const pathname = usePathname();
+
+  const inAuth =
+    pathname.includes("/login") ||
+    pathname.includes("/signup") ||
+    pathname.includes("/forgot-password");
+
+  const inOnboarding =
+    pathname.includes("/onboarding");
 
   if (loading) {
     return (
@@ -25,9 +29,24 @@ export default function ProtectedLayout() {
     );
   }
 
-  if (!session && !inAuth) return <Redirect href="/login" />;
-  if (session && !onboardingCompleted && !inOnboarding) return <Redirect href="/onboarding" />;
-  if (session && onboardingCompleted && (inAuth || inOnboarding)) {
+  if (!session && !inAuth) {
+    return <Redirect href="/login" />;
+  }
+
+  if (
+    session &&
+    !onboardingCompleted &&
+    !inOnboarding
+  ) {
+    return <Redirect href="/onboarding" />;
+  }
+
+  if (
+    session &&
+    onboardingCompleted &&
+    (inAuth ||
+      (inOnboarding && !editingOnboarding))
+  ) {
     return <Redirect href="/" />;
   }
 
