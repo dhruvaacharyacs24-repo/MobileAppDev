@@ -106,7 +106,7 @@ export default function AnalysisScreen() {
           </Text>
 
           <Text className="mt-1 text-zinc-400">
-            Market-fit intelligence powered by Gemini AI
+            Market-fit intelligence powered by Gemini AI and Groq AI. 
           </Text>
         </GlassCard>
 

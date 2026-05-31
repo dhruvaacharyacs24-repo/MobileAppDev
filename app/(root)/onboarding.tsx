@@ -184,6 +184,9 @@ const [resumeLoading, setResumeLoading] =
           .map((v) => v.trim()),
         skills: values.skills.split(",").map((v) => v.trim()),
       });
+      profileQuery.refetch();
+skillsQuery.refetch();
+      
 
       setOnboardingCompleted(true);
     } catch (err) {
@@ -274,6 +277,17 @@ const [resumeLoading, setResumeLoading] =
       skills:
         parsed.skills.join(", "),
     });
+    onboardingDraft.save({
+  full_name: parsed.full_name ?? "",
+  education: parsed.education ?? "",
+  interests: parsed.interests.join(", "),
+  projects: parsed.projects.join(", "),
+  certifications: parsed.certifications.join(", "),
+  resume_text: parsed.resume_summary ?? "",
+  preferred_career_path:
+    parsed.preferred_career_path ?? "",
+  skills: parsed.skills.join(", "),
+});
 
     alert(
       `Resume analyzed successfully!\n\nResume Quality: ${parsed.resumeQuality}/100`

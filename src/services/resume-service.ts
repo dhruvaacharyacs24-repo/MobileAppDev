@@ -113,9 +113,11 @@ export const resumeService = {
   },
 
   parseResume: async (
-    resumeText: string
-  ): Promise<ParsedResume> => {
-    const prompt = `
+  resumeText: string
+): Promise<ParsedResume> => {
+  const trimmedResume = resumeText.slice(0, 12000);
+
+  const prompt = `
 You are an expert resume parser.
 
 Return ONLY valid JSON.
@@ -145,8 +147,11 @@ Rules:
 
 Resume:
 
-${resumeText}
+${trimmedResume}
 `;
+
+  try {
+    console.log("[RESUME] Trying Gemini");
 
     const { data } =
       await geminiClient.post(
@@ -179,8 +184,68 @@ ${resumeText}
       );
     }
 
+    console.log(
+      "[RESUME] Parsed using Gemini"
+    );
+
     return JSON.parse(raw) as ParsedResume;
-  },
+  } catch (error: any) {
+    const status =
+      error?.response?.status;
+
+    if (
+      status !== 429 ||
+      !env.EXPO_PUBLIC_GROQ_API_KEY
+    ) {
+      throw error;
+    }
+
+    console.log(
+      "[RESUME] Gemini rate limited. Falling back to Groq."
+    );
+
+    const groqResponse = await axios.post(
+      "https://api.groq.com/openai/v1/chat/completions",
+      {
+        model:
+          "llama-3.3-70b-versatile",
+        messages: [
+          {
+            role: "user",
+            content: prompt,
+          },
+        ],
+        temperature: 0.2,
+        response_format: {
+          type: "json_object",
+        },
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${env.EXPO_PUBLIC_GROQ_API_KEY}`,
+          "Content-Type":
+            "application/json",
+        },
+      }
+    );
+
+    const raw =
+      groqResponse.data?.choices?.[0]
+        ?.message?.content;
+
+    if (!raw) {
+      throw new Error(
+        "Groq returned empty response"
+      );
+    }
+
+    console.log(
+      "[RESUME] Parsed using Groq"
+    );
+
+    return JSON.parse(raw) as ParsedResume;
+  }
+},
 
   processResume: async (
     file: ResumeAsset

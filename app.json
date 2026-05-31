@@ -10,7 +10,8 @@
     "plugins": [
       "expo-router",
       "expo-secure-store",
-      "expo-notifications"
+      "expo-notifications",
+      "expo-font"
     ],
     "ios": {
       "supportsTablet": true
@@ -23,13 +24,20 @@
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "package": "com.dhruvaacharya.skillsyncai"
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "4b988067-51ff-4117-9f2a-da2092358b04"
+      }
     }
   }
 }

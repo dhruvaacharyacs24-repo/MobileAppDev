@@ -7,6 +7,7 @@ const envSchema = z.object({
   EXPO_PUBLIC_RAPIDAPI_KEY: z.string().optional(),
   EXPO_PUBLIC_GEMINI_API_KEY: z.string().optional(),
   EXPO_PUBLIC_PDFCO_API_KEY: z.string().optional(),
+  EXPO_PUBLIC_GROQ_API_KEY: z.string().optional(),
 });
 
 const parsed = envSchema.parse({
@@ -16,6 +17,7 @@ const parsed = envSchema.parse({
   EXPO_PUBLIC_RAPIDAPI_KEY: process.env.EXPO_PUBLIC_RAPIDAPI_KEY,
   EXPO_PUBLIC_GEMINI_API_KEY: process.env.EXPO_PUBLIC_GEMINI_API_KEY,
   EXPO_PUBLIC_PDFCO_API_KEY: process.env.EXPO_PUBLIC_PDFCO_API_KEY,
+  EXPO_PUBLIC_GROQ_API_KEY: process.env.EXPO_PUBLIC_GROQ_API_KEY,
 });
 
 export const env = {
@@ -24,4 +26,5 @@ export const env = {
   EXPO_PUBLIC_RAPIDAPI_KEY: parsed.EXPO_PUBLIC_RAPIDAPI_KEY ?? "",
   EXPO_PUBLIC_GEMINI_API_KEY: parsed.EXPO_PUBLIC_GEMINI_API_KEY ?? "",
   EXPO_PUBLIC_PDFCO_API_KEY: parsed.EXPO_PUBLIC_PDFCO_API_KEY ?? "",
+  EXPO_PUBLIC_GROQ_API_KEY: parsed.EXPO_PUBLIC_GROQ_API_KEY ?? "",
 };
