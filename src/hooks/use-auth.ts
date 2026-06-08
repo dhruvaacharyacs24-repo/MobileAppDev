@@ -30,6 +30,11 @@ export const useAuthBootstrap = () => {
                 data.session.user.id
               );
 
+            console.log(
+              "PROFILE RESULT",
+              profile
+            );
+
             setOnboardingCompleted(
               Boolean(profile)
             );
@@ -49,6 +54,9 @@ export const useAuthBootstrap = () => {
           "[AUTH] Session restore failed",
           error
         );
+
+        setSession(null);
+        setOnboardingCompleted(false);
       } finally {
         setLoading(false);
       }
@@ -69,10 +77,20 @@ export const useAuthBootstrap = () => {
                     session.user.id
                   );
 
+                console.log(
+                  "PROFILE RESULT",
+                  profile
+                );
+
                 setOnboardingCompleted(
                   Boolean(profile)
                 );
-              } catch {
+              } catch (error) {
+                console.log(
+                  "[AUTH] Profile fetch failed",
+                  error
+                );
+
                 setOnboardingCompleted(false);
               }
             } else {

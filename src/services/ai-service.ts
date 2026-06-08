@@ -66,7 +66,17 @@ ${JSON.stringify(payload.market)}
 
 Rules:
 - readinessScore must be between 0 and 100
-- max 5 items per array
+-no linient score must be given. If the profile has clear gaps compared to market demand, readinessScore should reflect that with a lower score.
+- strengths should highlight any clear advantages in the profile, even if overall readiness is low
+- weaknesses should be specific and actionable, not generic statements
+- missing skills should be directly relevant to the student's career goals and market demand
+- roadmap should include clear, actionable steps with a suggested timeline (e.g. 5 step plan over 3 months)
+- clear and detailed feedback for each section
+- strengths and weaknesses should be specific to the profile
+- missing skills should be relevant to the student's career goals and market demand
+- recommendations should be personalized, practical and detailed
+- ATS feedback should focus on improving resume impact and keyword optimization
+- max 6 items per array with clear real time data driven insights uploaded from resume and market data
 - personalized recommendations
 - concise professional language
 `;
@@ -107,7 +117,7 @@ Rules:
       const status = error?.response?.status;
 
       if (
-        status === 429 &&
+        (status === 429 || status===503) &&
         env.EXPO_PUBLIC_GROQ_API_KEY
       ) {
         try {

@@ -181,22 +181,23 @@ const [resumeLoading, setResumeLoading] =
 
     try {
       await profileService.upsertOnboarding(session.user.id, {
-        ...values,
-        github_url: values.github_url.trim(),
-        linkedin_url: values.linkedin_url.trim(),
-        interests: values.interests.split(",").map((v) => v.trim()),
-        projects: values.projects.split(",").map((v) => v.trim()),
-        certifications: values.certifications
-          .split(",")
-          .map((v) => v.trim()),
-        skills: values.skills.split(",").map((v) => v.trim()),
-      });
-      profileQuery.refetch();
-skillsQuery.refetch();
-      
+  ...values,
+  github_url: values.github_url.trim(),
+  linkedin_url: values.linkedin_url.trim(),
+  interests: values.interests.split(",").map((v) => v.trim()),
+  projects: values.projects.split(",").map((v) => v.trim()),
+  certifications: values.certifications
+    .split(",")
+    .map((v) => v.trim()),
+  skills: values.skills.split(",").map((v) => v.trim()),
+});
 
-      setEditingOnboarding(false);
+setEditingOnboarding(false);
 setOnboardingCompleted(true);
+
+setTimeout(() => {
+  router.replace("/");
+}, 100);
     } catch (err) {
       setError(
         err instanceof Error
@@ -224,7 +225,7 @@ setOnboardingCompleted(true);
   <View className="mb-4 flex-row justify-end">
   <Pressable
     onPress={() =>
-      router.push("/(root)/(tabs)")
+      router.replace("/")
     }
   >
     <Text className="font-semibold text-cyan-300">
@@ -364,12 +365,13 @@ setOnboardingCompleted(true);
             </Text>
           </View>
 
-          {profileQuery.isLoading || skillsQuery.isLoading ? (
-            <ActivityIndicator
-              color="#22D3EE"
-              className="my-6"
-            />
-          ) : null}
+          {profileQuery.isLoading &&
+ !profileQuery.data ? (
+  <ActivityIndicator
+    color="#22D3EE"
+    className="my-6"
+  />
+) : null}
           <Text className="mt-8 mb-3 text-lg font-semibold text-cyan-300">
               Personal Information
           </Text>

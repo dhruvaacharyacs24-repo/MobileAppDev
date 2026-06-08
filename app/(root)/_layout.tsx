@@ -20,7 +20,11 @@ export default function ProtectedLayout() {
 
   const inOnboarding =
     pathname.includes("/onboarding");
-
+  console.log("AUTH", {
+  loading,
+  onboardingCompleted,
+  hasSession: !!session,
+});
   if (loading) {
     return (
       <View className="flex-1 items-center justify-center bg-bg">
